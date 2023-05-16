@@ -49,7 +49,7 @@ class ImageExtractor:
 
   #code reference: https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
   #according to this paper: https://www.researchgate.net/publication/282446068_Automatic_chessboard_corner_detection_method
-  def _order_points(self, pts) -> np.ndarray:
+  def _order_points(self, pts: np.ndarray) -> np.ndarray:
     rect = np.zeros((4, 2), dtype = "float32")
 
     s = pts.sum(axis = 1)
@@ -74,7 +74,7 @@ class ImageExtractor:
 
     self._corners.clear()
 
-  def _mouse_callback(self, event, x, y, flags, params):
+  def _mouse_callback(self, event: any, x: int, y: int, *_) -> None:
     if event == cv2.EVENT_LBUTTONDOWN:
       point = (x,y)
       self._corners.append(point)   
