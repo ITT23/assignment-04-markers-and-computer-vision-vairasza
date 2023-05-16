@@ -5,7 +5,7 @@ WINDOW_NAME = 'Preview Window'
 
 cv2.namedWindow(WINDOW_NAME)
 
-def mouse_callback(event, x, y, flags, param):
+def mouse_callback(event, x, y, *_):
     global img
 
     if event == cv2.EVENT_LBUTTONDOWN:
