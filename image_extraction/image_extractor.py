@@ -1,4 +1,4 @@
-import os
+import os,time
 from argparse import ArgumentParser, ArgumentTypeError
 
 import cv2
@@ -92,7 +92,6 @@ class ImageExtractor:
 
   def run(self) -> None:
     cv2.namedWindow(self.NAME)
-    cv2.imshow(self.NAME, self._work_image)
     cv2.setMouseCallback(self.NAME, self._mouse_callback) #imshow must be called before setting mouse callback else there are no events
 
     while True:    
