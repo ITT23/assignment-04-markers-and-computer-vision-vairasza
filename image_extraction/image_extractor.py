@@ -1,4 +1,4 @@
-import os,time
+import os
 from argparse import ArgumentParser, ArgumentTypeError
 
 import cv2
@@ -9,6 +9,7 @@ import numpy as np
 class ImageExtractor:
 
   NAME = "Image Extractor"
+  SUPPORTED_FILE_FORMATS = (".jpg", ".png", ".jpeg")
   CURR_DIR = os.path.dirname(__file__)
   NUM_MAX_CORNERS = 4
   WAIT_TIME = 1
@@ -16,7 +17,7 @@ class ImageExtractor:
   CIRCLE_COLOUR = (255,0,0)
   CIRCLE_THICKNESS = -1
 
-  def __init__(self, input_file: str, output_path: str, width: int, height: int) -> None:
+  def __init__(self, input_file: str, output_path: str, output_file_name: str, width: int, height: int) -> None:
     self.input_file = input_file
     self.output_path = output_path.removeprefix("./") #removing ./ to avoid misshaped paths due to os.path.join
 
@@ -24,13 +25,19 @@ class ImageExtractor:
     self.height = height
 
     self._check_paths()
-    self.file_name = os.path.basename(self.input_file)
+    if output_file_name is not None:
+      self.file_name = output_file_name
+    else:
+      self.file_name = os.path.basename(self.input_file)
 
     self._original_image = self._load_image()
     self._work_image = self._original_image.copy()
     self._corners = []
 
   def _check_paths(self) -> None:
+    '''
+      check if the file and outputfolder passed via command line arguments exist because loading/saving to non existing paths causes an unwanted exception.
+    '''
     if not os.path.isfile(self.input_file) and not os.path.isfile(os.path.join(self.CURR_DIR, self.input_file)):
       raise FileNotFoundError(f"No such file: {self.input_file}")
 
@@ -50,6 +57,9 @@ class ImageExtractor:
   #code reference: https://pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
   #according to this paper: https://www.researchgate.net/publication/282446068_Automatic_chessboard_corner_detection_method
   def _order_points(self, pts: np.ndarray) -> np.ndarray:
+    '''
+      the four points to define the corners of the rectangle are ordered so that the image is never twisted or head first.
+    '''
     rect = np.zeros((4, 2), dtype = "float32")
 
     s = pts.sum(axis = 1)
@@ -104,12 +114,15 @@ class ImageExtractor:
 
       #save image to dest location
       elif key == ord("s"):
-        if cv2.imwrite(os.path.join(self.output_path, self.file_name), self._work_image):
-          print("image successfully saved")
+        path = os.path.join(self.output_path, self.file_name)
+
+        if cv2.imwrite(path, self._work_image):
+          print(f"image successfully saved to {path}")
+
         else:
           print("there was an error writing the image.")
 
-        break
+        break #after saving the image to the desired location, break the while loop which exits the application.
 
       #exit application
       elif key == ord("0"):
@@ -117,7 +130,8 @@ class ImageExtractor:
     
     cv2.destroyAllWindows()
 
-def check_positive_int(value) -> bool:
+
+def check_positive_int(value: str) -> bool:
   try:
     int_val = int(value)
     if int_val < 0:
@@ -126,14 +140,23 @@ def check_positive_int(value) -> bool:
   except Exception:
     raise ArgumentTypeError(f"{value} is not a positive integer.")
 
+def check_file_ending(value: str) -> str:
+  has_file_format = value.endswith(ImageExtractor.SUPPORTED_FILE_FORMATS)
+  if not has_file_format:
+    raise ArgumentTypeError(f"{value} is not of supported file format {ImageExtractor.SUPPORTED_FILE_FORMATS}")
+  
+  return value
+
+
 if __name__ == "__main__":
   parser = ArgumentParser(prog=f"{ImageExtractor.NAME}", description="Perform perspective transformation with open cv.")
-  parser.add_argument("input_file", type=str, help="absolute or relative path to an input file of type image.")
+  parser.add_argument("input_file", type=check_file_ending, help=f"absolute or relative path to an input file of type image. supported file formats are {ImageExtractor.SUPPORTED_FILE_FORMATS}")
   parser.add_argument("-o", default="output", type=str, help="absolute or relative path to an output folder. default to current folder. relative without trailing ./")
+  parser.add_argument("-r", type=check_file_ending, help=f"rename the input file. supported file formats are {ImageExtractor.SUPPORTED_FILE_FORMATS}")
   parser.add_argument("-wt", type=check_positive_int, help="width of output image. default to source width.")
   parser.add_argument("-ht", type=check_positive_int, help="height of output image. default to source height.")
 
   args = parser.parse_args()
 
-  image_extractor = ImageExtractor(args.input_file, args.o, args.wt, args.ht)
+  image_extractor = ImageExtractor(args.input_file, args.o, args.r, args.wt, args.ht)
   image_extractor.run()
