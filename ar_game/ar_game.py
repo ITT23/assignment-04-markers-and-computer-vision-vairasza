@@ -22,7 +22,9 @@ class Application:
 
     self.window = Window(self.window_width, self.window_height, caption=C.Game.NAME)
     self.fps_display = FPSDisplay(window=self.window, color=C.Font.COLOUR)
+    self.show_fps = False
     self.on_draw = self.window.event(self.on_draw)
+    self.on_key_press = self.window.event(self.on_key_press)
     self.on_key_press = self.window.event(self.on_key_press)
 
     self.game = Game(width=self.window_width, height=self.window_height)
@@ -46,14 +48,15 @@ class Application:
     img = cv2glet(image, 'BGR')
     img.blit(0,0,0)
     
-    self.fps_display.draw()
+    if self.show_fps:
+      self.fps_display.draw()
     
     if self.game.state == AppState.START:
       if is_warped:
         self.game.run(thresh)
-      self.menu.hide_game_over()
-      self.menu.show_score()
-      self.menu.update_score(self.game.score)
+        self.menu.hide_game_over()
+        self.menu.show_score()
+        self.menu.update_score(self.game.score)
 
     elif self.game.state == AppState.END:
       self.menu.hide_score()
@@ -67,6 +70,9 @@ class Application:
 
     elif symbol == key.ESCAPE:
       pyglet.app.exit()
+
+    elif symbol == key.F:
+      self.show_fps = not self.show_fps
 
 if __name__ == "__main__":
   parser = ArgumentParser(prog="AR Game", description="crazy ar game.")
