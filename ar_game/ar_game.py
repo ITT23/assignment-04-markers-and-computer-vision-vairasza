@@ -25,7 +25,6 @@ class Application:
     self.show_fps = False
     self.on_draw = self.window.event(self.on_draw)
     self.on_key_press = self.window.event(self.on_key_press)
-    self.on_key_press = self.window.event(self.on_key_press)
 
     self.game = Game(width=self.window_width, height=self.window_height)
     self.game.init()

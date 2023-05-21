@@ -15,10 +15,13 @@
 
 ## Task 2
 
-- start with `python ar_game.py -d [webcam_device_id]
+- start with `python ar_game.py -d [webcam_device_id]`
 - shows flipped image of your webcam so that playing the game feels more easy
 - showing the board with aruco markers in the webcam wraps the image and runs the game
+- if the board is not correctly into the webcam, the game pauses
 - use your finger or objects (only works if the object has a colour within these boundaries `LOWER = [0,48,80]; UPPER = [20,255,255]`
 - the obstacle is to hit the incoming balls with your finger
 - the games ends after x seconds and displays the score with an option to restart
 - press `ESC` to exit the game any time
+- press `SPACE` to restart the game
+- FPS display can be toggled by pressing `f`
